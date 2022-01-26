@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#
+# Проверка подписи
+#
+
+tmp=`mktemp`
+cat - > "$tmp"
+cryptcp -verify -norev -f "$tmp" "$tmp"
+signResult=$?
+rm -f "$tmp"
+if [ "$signResult" != "0" ]; then
+  exit $signResult
+fi
