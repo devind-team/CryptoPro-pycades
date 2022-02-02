@@ -1,2 +1,9 @@
 /.idea
 /http/.idea
+/certificates/example
+/signed
+/no_signed
+/unsigned
+/test
+/example_http
+/http/scripts
