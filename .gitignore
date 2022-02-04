@@ -7,3 +7,9 @@
 /test
 /example_http
 /http/scripts
+
+# temporary blocking
+signed_docker.py
+docker-compose.yml
+/dist/install.sh
+/http/test_main.http
