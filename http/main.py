@@ -105,7 +105,15 @@ async def signer_file(file: UploadFile = File(...)):
                                  })
 
 
-
+@app.post('/unsigner')
+async def unsigner_file(file: UploadFile = File(...)):
+    contents = (await file.read()).decode()
+    _signedData = pycades.SignedData()
+    _signedData.VerifyCades(contents, pycades.CADESCOM_CADES_BES)
+    unsignature = _signedData.Content
+    return JSONResponse(content={'unsignedContent': unsignature,
+                                 'filename': f"{file.filename.replace('.sig', '')}"
+                                 })
 
 
 @app.post('/verify')
