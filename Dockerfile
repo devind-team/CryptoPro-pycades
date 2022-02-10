@@ -64,7 +64,7 @@ RUN set -ex && \
     make -j4
 
 
-FROM python:3.9.10 AS cryptopro-http
+FROM python:3.9.10
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage
@@ -83,7 +83,7 @@ RUN set -ex && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Copying bash scripts for container operation via command line
+# Copying bash scripts for container operation via command
 ADD scripts /scripts
 
 # Creation of symbolic links in the contaioner so that CryptoPro functions can be performed via the command line
@@ -100,12 +100,26 @@ RUN cd /bin && \
 
 #FROM cryptopro-http
 
-#ADD ./http /http
+ENV PYTHONUNBUFFERED 1
+ENV PATH /usr/local/bin:$PATH
+ENV LANG C.UTF-8
 
-#RUN cd /http \
-#    apt-get update -y && \
-#    pip install poetry --no-cache-dir && \
-#    pip install --upgrade pip && \
-#    poetry install && \
+RUN mkdir /http
+
+WORKDIR /http
+
+RUN apt-get update -y && \
+    pip install poetry && \
+    pip install --upgrade pip
 #    apt-get autoremove -y && \
 #    rm -rf /var/lib/apt/lists/*
+
+COPY http/pyproject.toml /http
+
+RUN poetry install
+
+COPY /http /http
+
+CMD poetry run uvicorn main:app --host 0.0.0.0 --port 80
+
+#CMD ['poetry', 'run', 'uvicorn', 'main:app', '--reload', '--host', 'localhost', '--port', '80']
