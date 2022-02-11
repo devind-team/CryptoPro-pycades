@@ -125,4 +125,18 @@ async def unsigner_file(file: UploadFile = File(...)):
                                  })
 
 
-
+@app.post('/verify')
+async def verified_file(original_file: UploadFile = File(...), signed_file: UploadFile = File(...)):
+    tmp_original = os.path.join('tmp', original_file.filename)
+    tmp_signed = os.path.join('tmp', signed_file.filename)
+    await write_file(tmp_original, original_file)
+    with open(tmp_signed, 'wb') as buffer:
+        buffer.write(base64.b64decode(json.loads((await unsigner_file(signed_file)).body)['unsignedContent']))
+        buffer.close()
+    if filecmp.cmp(tmp_original, tmp_signed):
+        subject_name = (await signature_data()).Certificate.SubjectName
+    else:
+        subject_name = 'Error (Maybe the file is signed with a different signature)'
+    os.remove(tmp_original)
+    os.remove(tmp_signed)
+    return JSONResponse(content={'verify': subject_name})
