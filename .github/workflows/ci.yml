@@ -7,12 +7,22 @@ on:
     branches: [ main ]
 
 jobs:
-
   build:
-
+    name: build
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag cryptopro:$(date +%s)
+    
+  release:
+    name: release
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Semantic Release
+        uses: relekang/python-semantic-release@master
+    
