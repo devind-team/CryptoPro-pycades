@@ -1,8 +1,10 @@
 [tool.poetry]
-name = "http"
-version = "0.1.0"
-description = ""
+name = "CryptoPro-pycades"
+version = "0.1.1"
+description = "An application that allows you to sign files through CryptoPro"
 authors = ["MarionetkaX <sergey07061999@gmail.com>"]
+license = "MIT"
+readme = "./README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -16,9 +18,3 @@ requests = "^2.27.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.semantic_release]
-version_variable = "pyproject.toml:version"
-branch = "main"
-upload_to_release = true
-build_command = "pip install poetry && poetry build"
