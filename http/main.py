@@ -8,7 +8,9 @@ from fastapi import \
     FastAPI,\
     File,\
     UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import \
+    JSONResponse, \
+    RedirectResponse
 
 app = FastAPI()
 
@@ -35,9 +37,8 @@ async def write_file(save_file, data_file):
 
 
 @app.get('/')
-async def main_page():
-    docs = 'http://127.0.0.1:8001/docs#/'
-    return f'Link to go to interactive API documents {docs}'
+async def redirect_page_docs():
+    return RedirectResponse('/docs#/')
 
 
 @app.get('/certificate')
@@ -84,7 +85,7 @@ async def data_certificates():
 
 @app.post('/certificate/root')
 async def root_certificates(file: UploadFile = File(...)):
-    root_certificate = os.path.join('tmp', file.filename)
+    root_certificate = os.path.join('./', 'tmp', file.filename)
     await write_file(root_certificate, file)
     os.system(f'cat {root_certificate}  | /scripts/root')
     os.remove(root_certificate)
@@ -93,7 +94,7 @@ async def root_certificates(file: UploadFile = File(...)):
 
 @app.post('/certificate/user')
 async def user_certificates(file: UploadFile = File(...)):
-    user_certificate = os.path.join('tmp', file.filename)
+    user_certificate = os.path.join('./', 'tmp', file.filename)
     await write_file(user_certificate, file)
     os.system(f'cat {user_certificate} | /scripts/my')
     os.remove(user_certificate)
@@ -103,7 +104,7 @@ async def user_certificates(file: UploadFile = File(...)):
 @app.post('/license')
 async def license_number(serial_number: str):
     os.system(f'cpconfig -license -set {serial_number}')
-    return JSONResponse(content={'status': 'Serial number license installed'})
+    return JSONResponse(content={'statusLicense': 'Serial number license installed'})
 
 
 @app.post('/signer')
@@ -139,4 +140,4 @@ async def verified_file(original_file: UploadFile = File(...), signed_file: Uplo
         subject_name = 'Error (Maybe the file is signed with a different signature)'
     os.remove(tmp_original)
     os.remove(tmp_signed)
-    return JSONResponse(content={'verify': subject_name})
+    return JSONResponse(content={'verifyContent': subject_name})
