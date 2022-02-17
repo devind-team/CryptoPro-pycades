@@ -120,6 +120,6 @@ RUN poetry install
 
 COPY /http /http
 
-CMD poetry run uvicorn main:app --host 0.0.0.0 --port 80
+CMD poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 #CMD ['poetry', 'run', 'uvicorn', 'main:app', '--reload', '--host', 'localhost', '--port', '80']
