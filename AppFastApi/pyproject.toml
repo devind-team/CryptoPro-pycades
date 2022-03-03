@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "An application that allows you to sign files through CryptoPro"
 authors = ["MarionetkaX <sergey07061999@gmail.com>"]
 license = "MIT"
-readme = "./README.md"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"

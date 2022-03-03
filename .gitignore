@@ -1,15 +1,15 @@
 /.idea
-/http/.idea
+/AppFastApi/.idea
 /certificates/example
 /signed
 /no_signed
 /unsigned
 /test
 /example_http
-/http/scripts
+/AppFastApi/scripts
 
 # temporary blocking
 signed_docker.py
 docker-compose.yml
 /dist/install.sh
-/http/test_main.http
+/AppFastApi/test_main.http

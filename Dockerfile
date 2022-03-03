@@ -86,6 +86,8 @@ RUN set -ex && \
 # Copying bash scripts for container operation via command
 ADD scripts /scripts
 
+ADD certificates /certificates
+
 # Creation of symbolic links in the contaioner so that CryptoPro functions can be performed via the command line
 RUN cd /bin && \
     ln -s /opt/cprocsp/bin/amd64/certmgr && \
@@ -98,15 +100,15 @@ RUN cd /bin && \
     ln -s /opt/cprocsp/bin/amd64/wipefile && \
     ln -s /opt/cprocsp/sbin/amd64/cpconfig
 
-#FROM cryptopro-http
+#FROM cryptopro-AppFastApi
 
 ENV PYTHONUNBUFFERED 1
 ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
 
-RUN mkdir /http
+RUN mkdir /AppFastApi
 
-WORKDIR /http
+WORKDIR /AppFastApi
 
 RUN apt-get update -y && \
     pip install poetry && \
@@ -114,12 +116,12 @@ RUN apt-get update -y && \
 #    apt-get autoremove -y && \
 #    rm -rf /var/lib/apt/lists/*
 
-COPY http/pyproject.toml /http
+COPY AppFastApi/pyproject.toml /AppFastApi
 
 RUN poetry install
 
-COPY /http /http
+COPY /AppFastApi /AppFastApi
 
-CMD poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+CMD poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8001
 
 #CMD ['poetry', 'run', 'uvicorn', 'main:app', '--reload', '--host', 'localhost', '--port', '80']
