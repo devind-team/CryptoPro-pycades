@@ -4,6 +4,7 @@ import pycades
 import base64
 import json
 import filecmp
+import pathlib
 from fastapi import \
     FastAPI,\
     File,\
@@ -11,24 +12,13 @@ from fastapi import \
 from fastapi.responses import \
     JSONResponse, \
     RedirectResponse
+from certificate.finder import \
+    store_data, \
+    signature_data, \
+    signature_data_pin
+from certificate.info import certificate_info
 
 app = FastAPI()
-
-
-async def store_data():
-    store = pycades.Store()
-    store.Open(pycades.CADESCOM_CONTAINER_STORE, pycades.CAPICOM_MY_STORE, pycades.CAPICOM_STORE_OPEN_MAXIMUM_ALLOWED)
-    certs = store.Certificates
-    assert (certs.Count != 0), "Certificates with private key not found"
-    return certs
-
-
-async def signature_data():
-    certificate = await store_data()
-    signer = pycades.Signer()
-    signer.Certificate = certificate.Item(1)
-    signer.CheckCertificate = True
-    return signer
 
 
 async def write_file(save_file, data_file):
@@ -43,62 +33,38 @@ async def redirect_page_docs():
 
 @app.get('/certificate')
 async def data_certificates():
+    ret = {}
     certificate = await store_data()
-    ret = []
     for i in range(1, certificate.Count+1):
-        cert = certificate.Item(i)
-        issuer = cert.IssuerName.split(',')
-        subject = cert.SubjectName.split(',')
-        cert_info = {
-            'privateKey': {
-                'providerName': cert.PrivateKey.ProviderName,
-                'uniqueContainerName': cert.PrivateKey.UniqueContainerName,
-                'containerName': cert.PrivateKey.ContainerName,
-            },
-            'algorithm': {
-                'name': cert.PublicKey().Algorithm.FriendlyName,
-                'val': cert.PublicKey().Algorithm.Value,
-            },
-            'valid': {
-                'from': cert.ValidFromDate,
-                'to': cert.ValidToDate,
-            },
-            'issuer': {
-                'C': issuer[8],
-                'L': issuer[6],
-                'O': issuer[1],
-                'CN': issuer[0],
-            },
-            'subject': {
-                'C': subject[4],
-                'L': subject[6],
-                'O': subject[7],
-                'CN': subject[8],
-            },
-            'thumbprint': cert.Thumbprint,
-            'serialNumber': cert.SerialNumber,
-            'hasPrivateKey': cert.HasPrivateKey()
-        }
-        ret.append(cert_info)
-    return JSONResponse(content={'certificate': ret})
+        ret[f'certificate_{i}'] = await certificate_info(certificate.Item(i))
+    return JSONResponse(content={'data_certificates': ret})
 
 
 @app.post('/certificate/root')
 async def root_certificates(file: UploadFile = File(...)):
-    root_certificate = os.path.join('./', 'tmp', file.filename)
-    await write_file(root_certificate, file)
-    os.system(f'cat {root_certificate}  | /scripts/root')
-    os.remove(root_certificate)
-    return JSONResponse(content={'status': 'Root certificate installed'})
+    if pathlib.Path(file.filename).suffix == ('.p7b' or '.cer'):
+        root_certificate = os.path.join('tmp', file.filename)
+        await write_file(root_certificate, file)
+        os.system(f'cat {root_certificate}  | /scripts/root')
+        os.remove(root_certificate)
+        return JSONResponse(content={'status': 'Root certificate installed'})
+    else:
+        return JSONResponse(content={'error': 'Invalid file format. Desired format <*.p7b> or <*.cer>'})
 
 
-@app.post('/certificate/user')
-async def user_certificates(file: UploadFile = File(...)):
-    user_certificate = os.path.join('./', 'tmp', file.filename)
-    await write_file(user_certificate, file)
-    os.system(f'cat {user_certificate} | /scripts/my')
-    os.remove(user_certificate)
-    return JSONResponse(content={'status': 'User certificate installed'})
+@app.post('/certificate/private_key')
+async def private_key(file: UploadFile = File(...), pin: str = ''):
+    if pathlib.Path(file.filename).suffix == '.zip':
+        user_certificate = os.path.join('tmp', file.filename)
+        await write_file(user_certificate, file)
+        if len(pin):
+            os.system(f'cat {user_certificate} | /scripts/my {pin}')
+        else:
+            os.system(f'cat {user_certificate} | /scripts/my')
+        os.remove(user_certificate)
+        return JSONResponse(content={'status': 'Private key installed'})
+    else:
+        return JSONResponse(content={'error': 'Invalid file format. Desired format <*.zip>'})
 
 
 @app.post('/license')
@@ -108,10 +74,14 @@ async def license_number(serial_number: str):
 
 
 @app.post('/signer')
-async def signer_file(file: UploadFile = File(...)):
+async def signer_file(file: UploadFile = File(...), pin: str = ''):
+    if len(pin):
+        signer = await signature_data_pin(pin)
+    else:
+        signer = await signature_data()
     signed_data = pycades.SignedData()
     signed_data.Content = base64.b64encode(await file.read()).decode()
-    signature = signed_data.SignCades(await signature_data(), pycades.CADESCOM_CADES_BES)
+    signature = signed_data.SignCades(signer, pycades.CADESCOM_CADES_BES)
     return JSONResponse(content={'signedContent': signature,
                                  'filename': f'{file.filename}.sig'
                                  })
