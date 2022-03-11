@@ -60,5 +60,5 @@ jobs:
           secrets: |
             'GH_TOKEN=${{ secrets.GITHUB_TOKEN }}'
           build-args: 'github_token=${{ secrets.GITHUB_TOKEN }}'
-          tags: ${{ steps.meta.outputs }}
+          tags: ${{ steps.meta.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
