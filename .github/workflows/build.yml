@@ -9,8 +9,34 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3.7.1
+        with:
+          github-token: ${{ secrets.CHANGELOG_RELEASE }}
+
+      - name: create release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHANGELOG_RELEASE }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+      - uses: actions/upload-artifact@main
+        with:
+          release_name: ${{ steps.changelog.outputs.tag }}
+
   build_cryptopro:
     name: Build cryptopro
+    needs: changelog
     permissions:
       contents: read
       packages: write
@@ -37,5 +63,5 @@ jobs:
             'GH_TOKEN=${{ secrets.GITHUB_TOKEN }}'
           build-args: 'github_token=${{ secrets.GITHUB_TOKEN }}'
           tags: |
-            ghcr.io/devind-team/cryptopro-pycades:v${{ github.ref }}
+            ghcr.io/devind-team/cryptopro-pycades:v${{ steps.changelog.outputs.tag }}
             ghcr.io/devind-team/cryptopro-pycades:latest
