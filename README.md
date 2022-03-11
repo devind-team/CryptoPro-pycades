@@ -38,7 +38,7 @@
 
 Запустить:
 
-```
+```bash
 docker build --tag cryptopro_5 .
 ```
 
@@ -50,7 +50,7 @@ docker build --tag cryptopro_5 .
 
 Запустим контейнер под именем `cryptopro`, к которому будем обращаться в примерах:
 
-```
+```bash
 docker run -it --rm -p 8095:80 --name cryptopro cryptopro_5
 ```
 
@@ -60,13 +60,13 @@ docker run -it --rm -p 8095:80 --name cryptopro cryptopro_5
 
 Установка серийного номера:
 
-```
+```bash
 docker exec -i cryptopro cpconfig -license -set <серийный_номер>
 ```
 
 Просмотр:
 
-```
+```bash
 docker exec -i cryptopro cpconfig -license -view
 ```
 
@@ -81,14 +81,14 @@ docker exec -i cryptopro cpconfig -license -view
 
 Скачаем сертификат на диск с помощью `curl` и передадим полученный файл на `stdin` с запуском команды его установки:
 
-```
+```bash
 curl -sS http://cpca.cryptopro.ru/cacer.p7b > certificates/cacer.p7b
 cat certificates/cacer.p7b | docker exec -i cryptopro /scripts/root
 ```
 
 ### Без скачивания на диск
 
-```
+```bash
 # сертификаты УЦ
 curl -sS http://cpca.cryptopro.ru/cacer.p7b | docker exec -i cryptopro /scripts/root
 # сертификаты тестового УЦ
@@ -132,7 +132,7 @@ curl -sS http://testca2012.cryptopro.ru/cert/subca.cer | docker exec -i cryptopr
 
 Примеры:
 
-```
+```bash
 # сертификат + закрытый ключ с пин-кодом
 cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 
@@ -155,7 +155,7 @@ cat certificates/bundle-cyrillic.zip | docker exec -i cryptopro /scripts/my
 
 Сертификаты пользователя:
 
-```
+```bash
 docker exec -i cryptopro certmgr -list
 ```
 
@@ -163,7 +163,7 @@ docker exec -i cryptopro certmgr -list
 
 Корневые сертификаты:
 
-```
+```bash
 docker exec -i cryptopro certmgr -list -store root
 ```
 
@@ -171,7 +171,7 @@ docker exec -i cryptopro certmgr -list -store root
 
 Для примера установим этот тестовый сертификат:
 
-```
+```bash
 # сертификат + закрытый ключ с пин-кодом
 cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 ```
@@ -180,13 +180,13 @@ cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 
 Теперь передадим на `stdin` файл, в качестве команды - последовательность действий, и на `stdout` получим подписанный файл:
 
-```
+```bash
 cat README.md | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -sign -thumbprint dd45247ab9db600dca42cc36c1141262fa60e3fe -nochain -pin 12345678 "$tmp" "$tmp.sig" > /dev/null 2>&1; cat "$tmp.sig"; rm -f "$tmp" "$tmp.sig"'
 ```
 
 Получилось довольно неудобно. Скрипт `scripts/sign` делает то же самое, теперь команда подписания будет выглядеть так:
 
-```
+```bash
 cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678
 ```
 
@@ -198,19 +198,19 @@ cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c
 
 Подпишем файл из примера выше и сохраним его на диск:
 
-```
+```bash
 cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678 > certificates/README.md.sig
 ```
 
 Тогда проверка подписанного файла будет выглядеть так:
 
-```
+```bash
 cat certificates/README.md.sig | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -verify -norev -f "$tmp" "$tmp"; rm -f "$tmp"'
 ```
 
 То же самое, но с использованием скрипта:
 
-```
+```bash
 cat certificates/README.md.sig | docker exec -i cryptopro scripts/verify
 ```
 
@@ -220,13 +220,13 @@ cat certificates/README.md.sig | docker exec -i cryptopro scripts/verify
 
 Возьмем файл из примера выше:
 
-```
+```bash
 cat certificates/README.md.sig | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -verify -nochain "$tmp" "$tmp.origin" > /dev/null 2>&1; cat "$tmp.origin"; rm -f "$tmp" "$tmp.origin"'
 ```
 
 То же самое, но с использованием скрипта:
 
-```
+```bash
 cat certificates/README.md.sig | docker exec -i cryptopro scripts/unsign
 ```
 
@@ -236,7 +236,7 @@ cat certificates/README.md.sig | docker exec -i cryptopro scripts/unsign
 
 В примерах выше команды выглядят так: `cat ... | docker ...` или `curl ... | docker ...`, то есть контейнер запущен на локальной машине. Если же докер контейнер запущен на удаленной машине, то команды нужно отправлять через ssh клиент. Например, команда подписания:
 
-```
+```bash
 cat README.md | ssh -q user@host 'docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678'
 ```
 
@@ -244,7 +244,7 @@ cat README.md | ssh -q user@host 'docker exec -i cryptopro /scripts/sign dd45247
 
 В качестве эксперимента можно отправить по ssh на свою же машину так:
 
-```
+```bash
 # копируем публичный ключ на "удаленную машину" (на самом деле - localhost)
 ssh-copy-id $(whoami)@localhost
 # пробуем подписать
@@ -278,7 +278,7 @@ cat README.md | ssh -q $(whoami)@localhost 'docker exec -i cryptopro /scripts/si
 
 Например, обращение с неправильным методом
 
-```sh
+```bash
 curl -sS -X POST --data-binary "bindata" http://localhost:8095/healthchecks
 ```
 
@@ -294,7 +294,7 @@ curl -sS -X POST --data-binary "bindata" http://localhost:8095/healthchecks
 
 ## `/certificates` - все установленные сертификаты пользователя
 
-```
+```bash
 curl -sS http://localhost:8095/certificates
 ```
 
@@ -358,7 +358,7 @@ curl -sS http://localhost:8095/certificates
 
 В `query` - параметры поиска, в `pin` - пин-код (если он установлен):
 
-```sh
+```bash
 CERT_QUERY="find_type=sha1&query=82028260efc03eedc88dcb61c0f6a02e788e26e2&pin=12345678"
 curl -sS -X POST --data-binary @- "http://localhost:8095/sign?$CERT_QUERY" < README.md
 ```
@@ -373,7 +373,7 @@ curl -sS -X POST --data-binary @- "http://localhost:8095/sign?$CERT_QUERY" < REA
 
 Подпишем файл и проверим его:
 
-```sh
+```bash
 # подпишем файл
 CERT_QUERY="find_type=sha1&query=82028260efc03eedc88dcb61c0f6a02e788e26e2&pin=12345678"
 curl -sS -X POST --data-binary @- "http://localhost:8095/sign?$CERT_QUERY" < README.md > /tmp/file.json
@@ -390,7 +390,7 @@ curl -sS -X POST --data-binary @- "http://localhost:8095/verify" < /tmp/file.sig
 
 Исходный файл вернется в поле `content`.
 
-```sh
+```bash
 # получим из подписанного файла /tmp/file.sig оригинальный файл, он будет в "content" файла /tmp/unsig.json
 curl -sS -X POST --data-binary @- "http://localhost:8095/unsign" < /tmp/file.sig > /tmp/unsig.json
 # выведем на экран первые несколько строк
