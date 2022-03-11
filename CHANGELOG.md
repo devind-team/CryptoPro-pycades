@@ -1,3 +1,12 @@
+## [0.1.8](https://github.com/devind-team/CryptoPro-pycades/compare/v0.1.7...v0.1.8) (2022-03-11)
+
+
+### Bug Fixes
+
+* change action ([ef78743](https://github.com/devind-team/CryptoPro-pycades/commit/ef787431ec1ca1b72e2f9213c5c236fc00a4b425))
+
+
+
 ## [0.1.7](https://github.com/devind-team/CryptoPro-pycades/compare/v0.1.6...v0.1.7) (2022-03-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * change action ([6be92ba](https://github.com/devind-team/CryptoPro-pycades/commit/6be92ba5645d2d0f8703cba899d929ab0050c511))
-
-
-
-## [0.1.3](https://github.com/devind-team/CryptoPro-pycades/compare/v0.1.2...v0.1.3) (2022-03-11)
-
-
-### Bug Fixes
-
-* change action ([4843b22](https://github.com/devind-team/CryptoPro-pycades/commit/4843b226cbb0918d519f54b079a740ad29c5a07a))
 
 
 
