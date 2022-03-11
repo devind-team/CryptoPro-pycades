@@ -88,6 +88,8 @@ ADD scripts /scripts
 
 ADD certificates /certificates
 
+ADD package.json /certificates
+
 # Creation of symbolic links in the contaioner so that CryptoPro functions can be performed via the command line
 RUN cd /bin && \
     ln -s /opt/cprocsp/bin/amd64/certmgr && \
