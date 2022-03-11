@@ -33,6 +33,7 @@ jobs:
 
   build_cryptopro:
     name: Build cryptopro
+    needs: changelog
     permissions:
       contents: read
       packages: write
