@@ -1,4 +1,13 @@
-# 0.1.0 (2022-03-11)
+## [0.1.1](https://github.com/devind-team/CryptoPro-pycades/compare/v0.1.0...v0.1.1) (2022-03-13)
+
+
+### Bug Fixes
+
+* test notification slack ([318e211](https://github.com/devind-team/CryptoPro-pycades/commit/318e2116348b9ae896b381250aad3c63079f3150))
+
+
+
+# [0.1.0](https://github.com/devind-team/CryptoPro-pycades/compare/95a9e13181dedb8ba56f58a79e3003bd9ca1f3dc...v0.1.0) (2022-03-11)
 
 
 ### Bug Fixes
