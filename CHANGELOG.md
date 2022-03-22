@@ -3,7 +3,7 @@
 
 ### Bug Fixes
 
-* move files ([33dc5ee](https://github.com/devind-team/CryptoPro-pycades/commit/33dc5ee55db437fd02cb563d2635ce5a7f5ff46b))
+* change build ([39f1050](https://github.com/devind-team/CryptoPro-pycades/commit/39f10507e30cfb996965c74ad88ebcb8d7896f55))
 
 
 
