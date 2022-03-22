@@ -1,8 +1,8 @@
 name: Build
 on:
   push:
-    branches:
-      - main
+#    branches:
+#      - main
     tags:
       - 'v*'
 
@@ -11,26 +11,26 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  release:
-    name: release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: conventional Changelog Action
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v3
-        with:
-          github-token: ${{ secrets.github_token }}
-          output-file: CHANGELOG.md
-          release-count: 0
-          skip-version-file: true
-          skip-git-pull: true
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.changelog.outputs.tag }}
-          name: Release ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.changelog }}
+#  release:
+#    name: release
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: conventional Changelog Action
+#        id: changelog
+#        uses: TriPSs/conventional-changelog-action@v3
+#        with:
+#          github-token: ${{ secrets.github_token }}
+#          output-file: CHANGELOG.md
+#          release-count: 0
+#          skip-version-file: true
+#          skip-git-pull: true
+#      - name: Create a GitHub release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          tag: ${{ steps.changelog.outputs.tag }}
+#          name: Release ${{ steps.changelog.outputs.tag }}
+#          body: ${{ steps.changelog.outputs.changelog }}
 
   build_cryptopro:
     name: Build cryptopro
