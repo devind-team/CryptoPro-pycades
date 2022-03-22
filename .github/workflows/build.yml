@@ -34,7 +34,7 @@ jobs:
 
   build_cryptopro:
     name: Build cryptopro
-    needs: release
+    # needs: release
     permissions:
       contents: read
       packages: write
