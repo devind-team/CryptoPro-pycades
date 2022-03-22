@@ -17,8 +17,11 @@ from certificate.finder import \
     signature_data, \
     signature_data_pin
 from certificate.info import certificate_info
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
 async def write_file(save_file, data_file):
@@ -43,7 +46,7 @@ async def data_certificates():
 @app.post('/certificate/root')
 async def root_certificates(file: UploadFile = File(...)):
     if pathlib.Path(file.filename).suffix == ('.p7b' or '.cer'):
-        root_certificate = os.path.join('tmp', file.filename)
+        root_certificate = os.path.join('static', file.filename)
         await write_file(root_certificate, file)
         os.system(f'cat {root_certificate}  | /scripts/root')
         os.remove(root_certificate)
@@ -55,7 +58,7 @@ async def root_certificates(file: UploadFile = File(...)):
 @app.post('/certificate/private_key')
 async def private_key(file: UploadFile = File(...), pin: str = ''):
     if pathlib.Path(file.filename).suffix == '.zip':
-        user_certificate = os.path.join('tmp', file.filename)
+        user_certificate = os.path.join('static', file.filename)
         await write_file(user_certificate, file)
         if len(pin):
             os.system(f'cat {user_certificate} | /scripts/my {pin}')
@@ -98,8 +101,8 @@ async def unsigner_file(file: UploadFile = File(...)):
 
 @app.post('/verify')
 async def verified_file(original_file: UploadFile = File(...), signed_file: UploadFile = File(...)):
-    tmp_original = os.path.join('tmp', original_file.filename)
-    tmp_signed = os.path.join('tmp', signed_file.filename)
+    tmp_original = os.path.join('static', original_file.filename)
+    tmp_signed = os.path.join('static', signed_file.filename)
     await write_file(tmp_original, original_file)
     with open(tmp_signed, 'wb') as buffer:
         buffer.write(base64.b64decode(json.loads((await unsigner_file(signed_file)).body)['unsignedContent']))
