@@ -1,4 +1,4 @@
-FROM python:3.9.10 AS build
+FROM python:3.10 AS build
 
 LABEL developer="Miloslavskiy Sergey"
 LABEL maintainer="MiloslavskiySergey@yandex.ru"
@@ -50,7 +50,7 @@ RUN set -ex && \
     # curl -O https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip && \
     unzip pycades.zip && \
     # Set the value of the Python_INCLUDE_DIR variable in the CMakeList.txt file (Python.h folder)
-    sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.9")' ./pycades_*/CMakeLists.txt
+    sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.10")' ./pycades_*/CMakeLists.txt
 
 # ENV PYCADES="pycades_0.1.30636"
 
@@ -68,7 +68,7 @@ FROM python:3.9.10
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage
-COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.9/pycades.so
+COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.10/pycades.so
 
 COPY --from=build /opt/cprocsp /opt/cprocsp/
 

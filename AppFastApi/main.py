@@ -5,6 +5,7 @@ import base64
 import json
 import filecmp
 import pathlib
+from typing import Optional
 from fastapi import \
     FastAPI,\
     File,\
@@ -20,8 +21,6 @@ from certificate.info import certificate_info
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-
-app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
 async def write_file(save_file, data_file):
@@ -56,11 +55,11 @@ async def root_certificates(file: UploadFile = File(...)):
 
 
 @app.post('/certificate/private_key')
-async def private_key(file: UploadFile = File(...), pin: str = ''):
+async def private_key(file: UploadFile = File(...), pin: Optional[str] = None):
     if pathlib.Path(file.filename).suffix == '.zip':
         user_certificate = os.path.join('static', file.filename)
         await write_file(user_certificate, file)
-        if len(pin):
+        if pin:
             os.system(f'cat {user_certificate} | /scripts/my {pin}')
         else:
             os.system(f'cat {user_certificate} | /scripts/my')
@@ -77,8 +76,8 @@ async def license_number(serial_number: str):
 
 
 @app.post('/signer')
-async def signer_file(file: UploadFile = File(...), pin: str = ''):
-    if len(pin):
+async def signer_file(file: UploadFile = File(...), pin: Optional[str] = None):
+    if pin:
         signer = await signature_data_pin(pin)
     else:
         signer = await signature_data()
@@ -106,7 +105,6 @@ async def verified_file(original_file: UploadFile = File(...), signed_file: Uplo
     await write_file(tmp_original, original_file)
     with open(tmp_signed, 'wb') as buffer:
         buffer.write(base64.b64decode(json.loads((await unsigner_file(signed_file)).body)['unsignedContent']))
-        buffer.close()
     if filecmp.cmp(tmp_original, tmp_signed):
         subject_name = (await signature_data()).Certificate.SubjectName
     else:

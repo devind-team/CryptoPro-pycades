@@ -54,9 +54,11 @@ def document_signing(dir_no_signed, dir_signed: str):
         'Content-Type': 'multipart/form-data'
     }
     response = requests.post(url_sign, files=files)
-    new_file = open(os.path.join(dir_signed, json.loads(response.text)['filename']), 'w')
-    new_file.write(json.loads(response.text)['signedContent'])
-    new_file.close()
+    with open(os.path.join(dir_signed, json.loads(response.text)['filename']), 'w') as new_file:
+        new_file.write(json.loads(response.text)['signedContent'])
+    # new_file = open(os.path.join(dir_signed, json.loads(response.text)['filename']), 'w')
+    # new_file.write(json.loads(response.text)['signedContent'])
+    # new_file.close()
 
 
 def decryption_signed_document(dir_signed, dir_unsigned: str):
@@ -68,9 +70,11 @@ def decryption_signed_document(dir_signed, dir_unsigned: str):
         'Content-Type': 'multipart/form-data'
     }
     response = requests.post(url_unsign, files=files)
-    new_file = open(os.path.join(dir_unsigned, json.loads(response.text)['filename']), 'wb')
-    new_file.write(base64.b64decode(json.loads(response.text)['unsignedContent']))
-    new_file.close()
+    with open(os.path.join(dir_unsigned, json.loads(response.text)['filename']), 'wb') as new_file:
+        new_file.write(base64.b64decode(json.loads(response.text)['unsignedContent']))
+    # new_file = open(os.path.join(dir_unsigned, json.loads(response.text)['filename']), 'wb')
+    # new_file.write(base64.b64decode(json.loads(response.text)['unsignedContent']))
+    # new_file.close()
 
 
 def signature_verification(original_file, signed_file: str):
