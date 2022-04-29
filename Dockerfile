@@ -64,7 +64,7 @@ RUN set -ex && \
     make -j4
 
 
-FROM python:3.9.10
+FROM python:3.10
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage
