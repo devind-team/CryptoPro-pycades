@@ -7,12 +7,12 @@
 * python3.9.10 с установленным расширением `pycades` (`CPStore`, `CPSigner`, `CPSignedData`)
 * инструменты КриптоПро: `certmgr`, `cpverify`, `cryptcp`, `csptest`, `csptestf`, `der2xer`, `inittst`, `wipefile`, `cpconfig`
 * вспомогательные скрипты командой строки
-* HTTP ?-сервер
+* HTTP REST-сервер
 
 Есть 3 варианта использования контейнера:
 
 * [через интерфейс командной строки](#cli) (и ssh-клиент для удаленных машин)
-* [через HTTP ?-сервер](#http)
+* [через HTTP REST-сервер](#http)
 * добавить свои обработчики внутрь контейнера
 
 # Структура проекта
@@ -50,7 +50,7 @@ docker build --tag cryptopro_5 .
 
 Запустим контейнер под именем `cryptopro`, к которому будем обращаться в примерах:
 
-```bash
+```shell
 docker run -it --rm -p 8095:80 --name cryptopro cryptopro_5
 ```
 
@@ -60,13 +60,13 @@ docker run -it --rm -p 8095:80 --name cryptopro cryptopro_5
 
 Установка серийного номера:
 
-```bash
+```shell
 docker exec -i cryptopro cpconfig -license -set <серийный_номер>
 ```
 
 Просмотр:
 
-```bash
+```shell
 docker exec -i cryptopro cpconfig -license -view
 ```
 
@@ -81,14 +81,14 @@ docker exec -i cryptopro cpconfig -license -view
 
 Скачаем сертификат на диск с помощью `curl` и передадим полученный файл на `stdin` с запуском команды его установки:
 
-```bash
+```shell
 curl -sS http://cpca.cryptopro.ru/cacer.p7b > certificates/cacer.p7b
 cat certificates/cacer.p7b | docker exec -i cryptopro /scripts/root
 ```
 
 ### Без скачивания на диск
 
-```bash
+```shell
 # сертификаты УЦ
 curl -sS http://cpca.cryptopro.ru/cacer.p7b | docker exec -i cryptopro /scripts/root
 # сертификаты тестового УЦ
@@ -132,7 +132,7 @@ curl -sS http://testca2012.cryptopro.ru/cert/subca.cer | docker exec -i cryptopr
 
 Примеры:
 
-```bash
+```shell
 # сертификат + закрытый ключ с пин-кодом
 cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 
@@ -155,7 +155,7 @@ cat certificates/bundle-cyrillic.zip | docker exec -i cryptopro /scripts/my
 
 Сертификаты пользователя:
 
-```bash
+```shell
 docker exec -i cryptopro certmgr -list
 ```
 
@@ -163,7 +163,7 @@ docker exec -i cryptopro certmgr -list
 
 Корневые сертификаты:
 
-```bash
+```shell
 docker exec -i cryptopro certmgr -list -store root
 ```
 
@@ -171,7 +171,7 @@ docker exec -i cryptopro certmgr -list -store root
 
 Для примера установим этот тестовый сертификат:
 
-```bash
+```shell
 # сертификат + закрытый ключ с пин-кодом
 cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 ```
@@ -180,13 +180,13 @@ cat certificates/bundle-pin.zip | docker exec -i cryptopro /scripts/my 12345678
 
 Теперь передадим на `stdin` файл, в качестве команды - последовательность действий, и на `stdout` получим подписанный файл:
 
-```bash
+```shell
 cat README.md | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -sign -thumbprint dd45247ab9db600dca42cc36c1141262fa60e3fe -nochain -pin 12345678 "$tmp" "$tmp.sig" > /dev/null 2>&1; cat "$tmp.sig"; rm -f "$tmp" "$tmp.sig"'
 ```
 
 Получилось довольно неудобно. Скрипт `scripts/sign` делает то же самое, теперь команда подписания будет выглядеть так:
 
-```bash
+```shell
 cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678
 ```
 
@@ -198,19 +198,19 @@ cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c
 
 Подпишем файл из примера выше и сохраним его на диск:
 
-```bash
+```shell
 cat README.md | docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678 > certificates/README.md.sig
 ```
 
 Тогда проверка подписанного файла будет выглядеть так:
 
-```bash
+```shell
 cat certificates/README.md.sig | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -verify -norev -f "$tmp" "$tmp"; rm -f "$tmp"'
 ```
 
 То же самое, но с использованием скрипта:
 
-```bash
+```shell
 cat certificates/README.md.sig | docker exec -i cryptopro scripts/verify
 ```
 
@@ -220,13 +220,13 @@ cat certificates/README.md.sig | docker exec -i cryptopro scripts/verify
 
 Возьмем файл из примера выше:
 
-```bash
+```shell
 cat certificates/README.md.sig | docker exec -i cryptopro sh -c 'tmp=`mktemp`; cat - > "$tmp"; cryptcp -verify -nochain "$tmp" "$tmp.origin" > /dev/null 2>&1; cat "$tmp.origin"; rm -f "$tmp" "$tmp.origin"'
 ```
 
 То же самое, но с использованием скрипта:
 
-```bash
+```shell
 cat certificates/README.md.sig | docker exec -i cryptopro scripts/unsign
 ```
 
@@ -236,7 +236,7 @@ cat certificates/README.md.sig | docker exec -i cryptopro scripts/unsign
 
 В примерах выше команды выглядят так: `cat ... | docker ...` или `curl ... | docker ...`, то есть контейнер запущен на локальной машине. Если же докер контейнер запущен на удаленной машине, то команды нужно отправлять через ssh клиент. Например, команда подписания:
 
-```bash
+```shell
 cat README.md | ssh -q user@host 'docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678'
 ```
 
@@ -244,29 +244,28 @@ cat README.md | ssh -q user@host 'docker exec -i cryptopro /scripts/sign dd45247
 
 В качестве эксперимента можно отправить по ssh на свою же машину так:
 
-```bash
+```shell
 # копируем публичный ключ на "удаленную машину" (на самом деле - localhost)
 ssh-copy-id $(whoami)@localhost
 # пробуем подписать
 cat README.md | ssh -q $(whoami)@localhost 'docker exec -i cryptopro /scripts/sign dd45247ab9db600dca42cc36c1141262fa60e3fe 12345678'
 ```
 
-# Работа с контейнером через HTTP ?-сервер<a name="http"></a>
+# Работа с контейнером через HTTP REST-сервер<a name="http"></a>
 
 Установка сертификатов осуществляется через командую строку. Все остальные действия доступны по HTTP.
 
-* `/healthcheck` - проверка работоспособности (`GET`)
 * `/certificates` - все установленные сертификаты пользователя (`GET`)
-* `/sign` - подписание документов (`POST`)
-* `/cosign` - добавление еще одной подписи к документу (`POST`)
+* `/certificate/root` - установка корневых сертификатов (`POST`)
+* `/certificate/private_key` - установка приватного колюча (`POST`)
+* `/license?serial_number=` - установка серийной лицензии (`POST`)
+* `/signer` - подписание документов (`POST`)
 * `/verify` - проверка подписанного документа (`POST`)
-* `/unsign` - получение исходного файла без подписей (`POST`)
+* `/unsigner` - получение исходного файла без подписей (`POST`)
 
 ![rest](https://raw.githubusercontent.com/dbfun/cryptopro/master/assets/rest.gif)
 
 ## Формат данных
-
-Для `POST` данные должны поступать в теле запроса в формате `x-www-form-urlencoded`.
 
 Возвращаются данные в формате `JSON`.
 
@@ -278,7 +277,7 @@ cat README.md | ssh -q $(whoami)@localhost 'docker exec -i cryptopro /scripts/si
 
 Например, обращение с неправильным методом
 
-```bash
+```shell
 curl -sS -X POST --data-binary "bindata" http://localhost:8095/healthchecks
 ```
 
@@ -288,14 +287,14 @@ curl -sS -X POST --data-binary "bindata" http://localhost:8095/healthchecks
 {"status":"fail","errMsg":"Method must be one of: GET","errCode":405}
 ```
 
-## `/healthcheck` - проверка работоспособности
 
-Используется, чтобы убедиться в работоспособности сервиса. Например, так: `docker ps -f name=cryptopro` или `curl http://localhost:8095/healthcheck`.
 
 ## `/certificates` - все установленные сертификаты пользователя
 
-```bash
-curl -sS http://localhost:8095/certificates
+```shell
+curl -X 'GET' \
+  'http://localhost:8001/certificate' \
+  -H 'accept: application/json'
 ```
 
 Если сертификатов нет:
@@ -308,108 +307,153 @@ curl -sS http://localhost:8095/certificates
 
 ```JSON
 {
-  "certificates": [
-    {
+  "data_certificates": {
+    "certificate_1": {
       "privateKey": {
         "providerName": "Crypto-Pro GOST R 34.10-2012 KC1 CSP",
         "uniqueContainerName": "HDIMAGE\\\\eb5f6857.000\\D160",
         "containerName": "eb5f6857-a08a-4510-8a96-df2f75b6d65a"
       },
       "algorithm": {
-        "name": "ГОСТ Р 34.10-2012",
+        "name": "ГОСТ Р 34.10-2012 256 бит",
         "val": "1.2.643.7.1.1.1.1"
       },
       "valid": {
-        "to": "24.05.2019 08:13:16",
-        "from": "24.02.2019 08:03:16"
+        "from": "23.08.2021 12:07:25",
+        "to": "23.08.2022 12:17:25"
       },
       "issuer": {
-        "E": "support@cryptopro.ru",
-        "C": "RU",
-        "L": "Moscow",
-        "O": "CRYPTO-PRO LLC",
-        "CN": "CRYPTO-PRO Test Center 2",
-        "raw": "CN=CRYPTO-PRO Test Center 2, O=CRYPTO-PRO LLC, L=Moscow, C=RU, E=support@cryptopro.ru"
-      },
-      "subject": {
-        "C": "RU",
-        "L": "Test",
+        "CN": "Test",
         "O": "Test",
         "OU": "Test",
+        "STREET": "Test",
+        "L": "Москва",
+        "C": "RU",
+        "raw": "CN=Test, O=Test, OU=Test, STREET=Test, L=Москва, S=77 Москва, C=RU, INN=Test, OGRN=Test"
+      },
+      "subject": {
+        "E": "Test@Test.ru",
+        "C": "RU",
+        "L": "г Москва",
+        "O": "Test",
         "CN": "Test",
-        "E": "test@test.ru",
-        "raw": "E=test@test.ru, CN=Test, OU=Test, O=Test, L=Test, S=Test, C=RU"
+        "STREET": "Test",
+        "G": "Test",
+        "SN": "Test ",
+        "raw": "SNILS=Test, OGRN=Test, INN=Test, E=Test@Test.ru, C=RU, S=77 г. Москва, L=г Москва, O=Test, CN=Test, STREET=Test, T=Test, G=Test, SN=Test"
       },
       "thumbprint": "982AA9E713A2F99B10DAA07DCDC94A4BC32A1027",
       "serialNumber": "120032C3567443029CC358FCDF00000032C356",
       "hasPrivateKey": true
     }
-  ],
-  "status": "ok"
+  }
 }
 ```
 
-## `/sign` - подписание документов
+## `/certificate/root` - установка корневых сертификатов
 
-Для выбора сертификата для подписания нужно указать один критерии поиска `find_type`:
+Для установки коневых сертификатов нужно передать файл (с расширением cer или p7b) в сервис.
 
-* `sha1` - по SHA1 сертификата
-* `subject` - по `subject` подписанта
-
-В `query` - параметры поиска, в `pin` - пин-код (если он установлен):
-
-```bash
-CERT_QUERY="find_type=sha1&query=82028260efc03eedc88dcb61c0f6a02e788e26e2&pin=12345678"
-curl -sS -X POST --data-binary @- "http://localhost:8095/sign?$CERT_QUERY" < README.md
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/certificate/root' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@filename.p7b;type=application/x-pkcs7-certificates'
 ```
 
-Вернется `JSON` - документ, в `signedContent` будет содержаться подписанный файл.
+## `/certificate/private_key` - установка приватного колюча
 
-## `/cosign` - добавление еще одной подписи к документу
+Для установки приватного колюча нужно передать архив в сервис.
+В каталоге `certificates/` содержатся различные комбинации тестового сертификата и закрытого ключа, с PIN кодом и без:
 
-Не реализовано, столкнулся с проблемой: не получается заставить работать функцию `CPSignedData::CoSignCades()`.
+```
+├── bundle-cert-only.zip          - только сертификат
+├── bundle-cosign.zip             - сертификат + закрытый ключ БЕЗ пин-кода (для добавления второй подписи)
+├── bundle-cyrillic.zip           - сертификат + закрытый ключ, название контейнера "тестовое название контейнера" (кириллица)
+├── bundle-no-pin.zip             - сертификат + закрытый ключ БЕЗ пин-кода
+├── bundle-pin.zip                - сертификат + закрытый ключ с пин-кодом 12345678
+└── bundle-private-key-only.zip   - только закрытый ключ
+```
+
+С пин-кодом:
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/certificate/private_key?pin=1234' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@bundle-pin.zip;type=application/zip'
+```
+Без пин-кодом:
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/certificate/private_key' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@bundle-no-pin.zip;type=application/zip'
+```
+## `/license?serial_number=` - установка серийной лицензии
+
+Для установки серийного номера лицензии нужно передать номер.
+
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/license?serial_number=12345-12345-12345-12345-12345' \
+  -H 'accept: application/json' \
+  -d ''
+```
+
+## `/signer` - подписание документов
+
+Для подписания нужно передать файл в сервис.
+
+С пин-кодом:
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/signer?pin=123' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@filename.pdf;type=application/pdf'
+```
+
+Без пин-кода:
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/signer' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@filename.pdf;type=application/pdf'
+```
+
+Вернется `JSON` - документ, в `signedContent` будет содержаться подписанный файл и в `filename` новое имя файла.
 
 ## `/verify` - проверка подписанного документа
 
-Подпишем файл и проверим его:
+Для проверки подписи передаем подписанный и не подписанный файлы.
 
-```bash
-# подпишем файл
-CERT_QUERY="find_type=sha1&query=82028260efc03eedc88dcb61c0f6a02e788e26e2&pin=12345678"
-curl -sS -X POST --data-binary @- "http://localhost:8095/sign?$CERT_QUERY" < README.md > /tmp/file.json
-# извлечем подписанный файл из "signedContent"
-jq ".signedContent" --raw-output /tmp/file.json > /tmp/file.sig
-# проверим подписанный файл
-curl -sS -X POST --data-binary @- "http://localhost:8095/verify" < /tmp/file.sig
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/verify' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'original_file=@filename1.pdf;type=application/pdf' \
+  -F 'signed_file=@filename2.pdf;type=application/pdf'
 ```
 
 Если файл прошел проверку, вернется список подписантов `signers`.
 
 
-## `/unsign` - получение исходного файла без подписей
+## `/unsigner` - получение исходного файла без подписей
 
 Исходный файл вернется в поле `content`.
 
-```bash
-# получим из подписанного файла /tmp/file.sig оригинальный файл, он будет в "content" файла /tmp/unsig.json
-curl -sS -X POST --data-binary @- "http://localhost:8095/unsign" < /tmp/file.sig > /tmp/unsig.json
-# выведем на экран первые несколько строк
-jq ".content" --raw-output /tmp/unsig.json | base64 -d | head
+```shell
+curl -X 'POST' \
+  'http://localhost:8001/unsigner' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@filename.sig;type=application/sig'
 ```
-
-
-## Проблемы
-
-Если pin-код не подходит, то в терминал выводится:
-
-```
-Wrong pin, 2 tries left.
-
-CryptoPro CSP: Type password for container "eb5f6857-a08a-4510-8a96-df2f75b6d65a"
-Password:
-```
-
-И подписание останавливается.
 
 
 # Ссылки
