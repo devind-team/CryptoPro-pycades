@@ -106,7 +106,8 @@ ENV PYTHONUNBUFFERED 1
 ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
 
-RUN mkdir /AppFastApi
+RUN mkdir /AppFastApi && \
+    mkdir /AppFastApi/static
 
 WORKDIR /AppFastApi
 
@@ -116,11 +117,9 @@ RUN apt-get update -y && \
 #    apt-get autoremove -y && \
 #    rm -rf /var/lib/apt/lists/*
 
-COPY AppFastApi/pyproject.toml /AppFastApi
+COPY /AppFastApi /AppFastApi
 
 RUN poetry install
-
-COPY /AppFastApi /AppFastApi
 
 CMD poetry run uvicorn main:app --host 0.0.0.0 --port 80
 
