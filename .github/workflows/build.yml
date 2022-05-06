@@ -60,7 +60,7 @@ jobs:
           tags: type=semver,pattern={{raw}},value=${{ needs.release.outputs.tag }}
           flavor: latest=auto
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
