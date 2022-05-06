@@ -1,4 +1,4 @@
-FROM python:3.10 AS build
+FROM python:3.9.10 AS build
 
 LABEL developer="Miloslavskiy Sergey"
 LABEL maintainer="MiloslavskiySergey@yandex.ru"
@@ -64,11 +64,11 @@ RUN set -ex && \
     make -j4
 
 
-FROM python:3.10
+FROM python:3.9.10
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage
-COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.10/pycades.so
+COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.9/pycades.so
 
 COPY --from=build /opt/cprocsp /opt/cprocsp/
 
