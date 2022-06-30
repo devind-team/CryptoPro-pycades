@@ -11,7 +11,7 @@ python = "^3.9"
 fastapi = "^0.74.1"
 uvicorn = "^0.17.5"
 python-multipart = "^0.0.5"
-requests = "^2.27.1"
+requests = "^2.28.1"
 
 [tool.poetry.dev-dependencies]
 
