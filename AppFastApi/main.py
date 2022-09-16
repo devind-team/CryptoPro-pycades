@@ -44,7 +44,7 @@ async def data_certificates():
 
 @app.post('/certificate/root')
 async def root_certificates(file: UploadFile = File(...)):
-    if pathlib.Path(file.filename).suffix == ('.p7b' or '.cer'):
+    if pathlib.Path(file.filename).suffix in ('.p7b', '.cer'):
         root_certificate = os.path.join('static', file.filename)
         await write_file(root_certificate, file)
         os.system(f'cat {root_certificate}  | /scripts/root')
