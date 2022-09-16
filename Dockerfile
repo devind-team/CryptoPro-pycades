@@ -1,4 +1,4 @@
-FROM python:3.9.10 AS build
+FROM python:3.10.6 AS build
 
 LABEL developer="Miloslavskiy Sergey"
 LABEL maintainer="MiloslavskiySergey@yandex.ru"
@@ -39,15 +39,15 @@ RUN set -ex && \
 # Download the archive from the CruptoPro EDS SDK (https://cryptopro.ru/products/cades/downloads), unpack this archive
 # and install the cprocsp-pki-cades package (version 2.0.14071 or later)
 RUN set -ex && \
-    # curl -O https://cryptopro.ru/sites/default/files/products/cades/current_release_2_0/cades-linux-amd64.tar.gz && \
-    mkdir ./cades-linux-amd64 && \
+    curl -O https://cryptopro.ru/sites/default/files/products/cades/current_release_2_0/cades-linux-amd64.tar.gz && \
+    #mkdir ./cades-linux-amd64 && \
     tar xvf cades-linux-amd64.tar.gz -C ./cades-linux-amd64 && \
     apt-get install ./cades-linux-amd64/cprocsp-pki-cades-*amd64.deb
 
 # Download and extract the pycades source archive
 # (https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip)
 RUN set -ex && \
-    # curl -O https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip && \
+    curl -O https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip && \
     unzip pycades.zip && \
     # Set the value of the Python_INCLUDE_DIR variable in the CMakeList.txt file (Python.h folder)
     sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.10")' ./pycades_*/CMakeLists.txt
@@ -56,7 +56,7 @@ RUN set -ex && \
 
 # Build extension pucades
 RUN set -ex && \
-    # cd /cprocsp/$PYCADES && \
+    #cd /cprocsp/$PYCADES && \
     cd /cprocsp/pycades_* && \
     mkdir build && \
     cd build && \
@@ -64,11 +64,11 @@ RUN set -ex && \
     make -j4
 
 
-FROM python:3.9.10
+FROM python:3.10.6
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage
-COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.9/pycades.so
+COPY --from=build /cprocsp/pycades_*/pycades.so /usr/local/lib/python3.10/pycades.so
 
 COPY --from=build /opt/cprocsp /opt/cprocsp/
 
