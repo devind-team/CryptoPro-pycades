@@ -1,19 +1,17 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    directory: "AppFastApi"
+    directory: "AppFastApi/"
     schedule:
       interval: daily
       time: "02:00"
+    target-branch: develop
     open-pull-requests-limit: 10
-    labels:
-      - 'type: dependencies'
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
       time: "02:00"
+    target-branch: develop
     open-pull-requests-limit: 10
-    labels:
-      - 'type: dependencies'
