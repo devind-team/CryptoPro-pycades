@@ -7,9 +7,3 @@
 /test
 /example_http
 /AppFastApi/scripts
-
-# temporary blocking
-signed_docker.py
-docker-compose.yml
-/dist/install.sh
-/AppFastApi/test_main.http
