@@ -40,7 +40,7 @@ RUN set -ex && \
 # and install the cprocsp-pki-cades package (version 2.0.14071 or later)
 RUN set -ex && \
     curl -O https://cryptopro.ru/sites/default/files/products/cades/current_release_2_0/cades-linux-amd64.tar.gz && \
-    #mkdir ./cades-linux-amd64 && \
+    mkdir ./cades-linux-amd64 && \
     tar xvf cades-linux-amd64.tar.gz -C ./cades-linux-amd64 && \
     apt-get install ./cades-linux-amd64/cprocsp-pki-cades-*amd64.deb
 
