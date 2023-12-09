@@ -39,15 +39,13 @@ RUN set -ex && \
 # Download the archive from the CruptoPro EDS SDK (https://cryptopro.ru/products/cades/downloads), unpack this archive
 # and install the cprocsp-pki-cades package (version 2.0.14071 or later)
 RUN set -ex && \
-    curl -O https://cryptopro.ru/sites/default/files/products/cades/current_release_2_0/cades-linux-amd64.tar.gz && \
     mkdir ./cades-linux-amd64 && \
-    tar xvf cades-linux-amd64.tar.gz -C ./cades-linux-amd64 && \
+    tar xvf cades-linux-amd64.tar.gz && \
     apt-get install ./cades-linux-amd64/cprocsp-pki-cades-*amd64.deb
 
 # Download and extract the pycades source archive
 # (https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip)
 RUN set -ex && \
-    curl -O https://cryptopro.ru/sites/default/files/products/cades/pycades/pycades.zip && \
     unzip pycades.zip && \
     # Set the value of the Python_INCLUDE_DIR variable in the CMakeList.txt file (Python.h folder)
     sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.10")' ./pycades_*/CMakeLists.txt
