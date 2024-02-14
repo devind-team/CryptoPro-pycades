@@ -40,7 +40,7 @@ RUN set -ex && \
 # and install the cprocsp-pki-cades package (version 2.0.14071 or later)
 RUN set -ex && \
     mkdir ./cades-linux-amd64 && \
-    tar xvf cades-linux-amd64.tar.gz && \
+    tar xvf cades-linux-amd64.tar.gz -C ./cades-linux-amd64 && \
     apt-get install ./cades-linux-amd64/cprocsp-pki-cades-*amd64.deb
 
 # Download and extract the pycades source archive
