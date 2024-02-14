@@ -1,4 +1,4 @@
-FROM python:3.10.6 AS build
+FROM python:3.12.2 AS build
 
 LABEL developer="Miloslavskiy Sergey"
 LABEL maintainer="MiloslavskiySergey@yandex.ru"
@@ -7,12 +7,12 @@ LABEL maintainer="MiloslavskiySergey@yandex.ru"
 RUN set -ex && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        curl \
-        cmake \
-        build-essential \
-        libboost-all-dev \
-        python3-dev \
-        unzip && \
+    curl \
+    cmake \
+    build-essential \
+    libboost-all-dev \
+    python3-dev \
+    unzip && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
@@ -48,7 +48,7 @@ RUN set -ex && \
 RUN set -ex && \
     unzip pycades.zip && \
     # Set the value of the Python_INCLUDE_DIR variable in the CMakeList.txt file (Python.h folder)
-    sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.10")' ./pycades_*/CMakeLists.txt
+    sed -i '2c\SET(Python_INCLUDE_DIR "/usr/local/include/python3.12")' ./pycades_*/CMakeLists.txt
 
 # ENV PYCADES="pycades_0.1.30636"
 
@@ -62,7 +62,7 @@ RUN set -ex && \
     make -j4
 
 
-FROM python:3.10.6
+FROM python:3.12.2
 # Adding a new layer
 # ENV PYCADES="pycades_0.1.30636"
 # Copying CryptoPro and expanding pycades from the previous stage

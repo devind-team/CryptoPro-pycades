@@ -2,16 +2,16 @@
 name = "CryptoPro-pycades"
 version = "0.1.1"
 description = "An application that allows you to sign files through CryptoPro"
-authors = ["MarionetkaX <sergey07061999@gmail.com>"]
+authors = ["MiloslavskiySergey <sergey07061999@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-fastapi = "^0.85.0"
-uvicorn = "^0.18.3"
-python-multipart = "^0.0.5"
-requests = "^2.28.0"
+python = "^3.12"
+fastapi = "^0.109.2"
+uvicorn = "^0.27.1"
+python-multipart = "^0.0.9"
+requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
 
